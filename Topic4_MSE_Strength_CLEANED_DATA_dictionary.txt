@@ -1,0 +1,64 @@
+Topic 4 — Physics-Constrained MSE Inversion for Rock Strength and Sanding-Risk Profiling: data dictionary
+=====================================================================================================
+
+Source: Utah FORGE well 58-32 (MU-ESW1), Milford, Utah, drilled July-September 2017. Drilling record: Podgorney, R., McLennan, J.,
+and Moore, J. 2018, Utah FORGE: Drilling Data for Student Competition, Geothermal Data Repository, https://doi.org/10.15121/1495411.
+Bit record, daily reports and end-of-well report: Nash, G., and Moore, J. 2018, Utah FORGE: Logs and Data from Deep Well 58-32
+(MU-ESW1), https://doi.org/10.15121/1452735. Core tests: McLennan, J. 2018, Utah FORGE: Well 58-32 Core Analyses,
+https://doi.org/10.15121/1557418. All released under CC BY 4.0.
+
+Topic4_MSE_Strength_CLEANED_DATA.csv  (one row per raw record, sorted by depth)
+  row_id                      index of the row in the raw file
+  Depth                       measured depth (ft)
+  WOB_klbf, RPM_surface       surface weight on bit (klbf, hook-load based) and surface rotary speed (rpm)
+  Torque_reading_psi          torque sensor reading (psi; no stated conversion to ft.lbf)
+  ROP_1ft_raw, ROP_1min_raw   penetration rate channels as recorded (ft/hr)
+  ROP_ft_hr                   per-foot ROP limited to 0.5-500 ft/hr (used in this study)
+  FlowIn_gpm, PumpPress_psi, Hookload_klbf   as recorded
+  hole_section, bit_in        hole section and bit diameter (in) from the bit record: 17½ in to 342 ft, 12¼ in to 2,180 ft, 8¾ in to TD
+  bit_type, bit_model, motor  bit run from the bit record (roller cone, hybrid, PDC or core; mud motor in the run)
+  lithology                   alluvium to 3,176 ft, rhyolite to 3,196 ft, granite below (end-of-well report)
+  circulating                 flow in above 50 gpm
+  on_bottom                   circulating, WOB > 2 klbf, ROP > 1 ft/hr
+  sliding                     on bottom with surface speed below 5 rpm
+  torque_live                 below 600 ft (the torque sensor reads about 5 psi above ~592 ft)
+  Teale_MSE_nominal_psi       equation (2) with the actual bit size, K_T = 40 ft.lbf/psi and K_N = 0.15 rev/gal in motor runs (rotating, torque-live rows)
+  Route1_strength_psi         0.35 x Teale_MSE_nominal_psi (the fixed-efficiency recipe; NOT a validated strength; the granite cores
+                              gave 13,200-18,300 psi)
+  synthetic_set               interval whose operating sequence and noise drive a synthetic set: '12¼-in set' (2,425-4,750 ft) or
+                              '8½-in set' (4,750 ft to TD). The set names are the nominal bit sizes of the synthetic truth; the
+                              well was drilled at 8¾ in over both intervals.
+  set_layer_25ft              index of the 25-ft layer within its set
+  res_lnROP, res_torque_psi   noise-library residuals about a 15-row running median (torque: rotating rows)
+  pdc_run                     PDC bit run used in the field application ('4,630–4,875 ft' or '6,552–6,800 ft'); blank elsewhere
+  field_layer_25ft            index of the 25-ft layer within the PDC run
+  field_R2_ln_strength        Route 2 MAP ln strength of the layer (ln psi), priors only. Core 1 below the lower run: ln 9.69 (16,200 psi);
+                              the Route 2 level is about ten times too high there (paper Section 6.8)
+  field_R2_layer_sd           Laplace SD of the layer's ln strength (conditional on the priors)
+  field_R2cal_ln_strength     Route 2 calibrated on core 1 (lower run only)
+  field_R2_fit_lnROP, field_R2_fit_torque_psi   Route 2 fitted ln ROP and torque reading (torque: rotating rows)
+
+Topic4_MSE_Strength_SCENARIOS.csv  (one row per synthetic profile that was inverted)
+  id, key                     profile id and synthetic set (12.25 = 12¼-in set, 8.5 = 8½-in set)
+  regime                      design (W*/W 0.2-0.9) or matched (median ROP matched to the record)
+  mean_ucs, sig_c, trend      true section-mean strength (psi), layer contrast log-SD, linear trend (log units)
+  state, f0, founder          efficiency state (constant/drift/step), base W*/W, founder present in truth
+  med_rop, med_PT             median synthetic ROP (ft/hr) and torque reading (psi)
+  ln_zeta, ln_mu, ln_KT, ln_KN, phi, Td   true rig and bit constants (drawn from the priors)
+  eta_true                    true median drilling efficiency eps/E
+  true_mean                   true section-mean ln eps (25-ft layers)
+  r1_lev, r1_rmse, r1_rho     Route 1 level error, contrast RMSE, rank correlation with truth
+  r2_lev, r2_lo, r2_hi        Route 2 level error and 95% profile interval relative to truth (log units)
+  r2_cover, r2_width          interval covers truth; interval width
+  r2_rmse, r2_rho, r2_ccover  contrast RMSE, rank correlation, fraction of layer intervals covering truth
+  r2_sdcon_med                median Laplace SD of layer contrasts
+  r2c_*                       the same with one calibrated layer
+  r2_ln_*_err                 Route 2 errors in the constants
+  r2_rmsR, r2_rmsT            RMS misfit of ln ROP and torque
+  r3h_*, r3s_*                Route 3 (hard, soft): mean level error over successful starts, SD between starts,
+                              median chi2/n, ensemble contrast RMSE, number of failed starts (test profiles only)
+
+Topic4_MSE_Strength_SCENARIO_LAYERS.csv  (one row per profile and 25-ft layer)
+  true_ln_eps, route1_ln_strength, route2_ln_eps, route2_sd_contrast, route2cal_ln_eps, route2cal_sd_contrast, calibrated_layer
+
+Units: natural-log strengths are ln(psi). Errors and widths are in natural-log units (0.10 is about 10%).
